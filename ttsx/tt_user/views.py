@@ -107,13 +107,15 @@ def check_login(request):
         if pwd == UserInfo.objects.get(uname=username).upwd :
             if checkbox == 'on':
                 request.session[username] = userpwd
-            return render(request,'tt_user/index.html',{'uname':username})
+            return redirect('/user/user_center_info/')
     return render(request,'tt_user/login.html',{'error':True})
 
 def session(request,name):
     #request.session.flush()
     h1=request.session.get(name)
     return JsonResponse({'data':h1})
+
+def user_center_info()
 
 
 

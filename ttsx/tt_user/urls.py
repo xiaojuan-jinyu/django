@@ -10,4 +10,5 @@ urlpatterns = [
     url(r'^index/$',views.index),
     url(r'^session(\w+)/$',views.session),
     url(r'^verify_code/$',views.verify_code),
+    url(r'^user_center_info/$',views.user_center_info),
 ]
