@@ -2,16 +2,17 @@
 from django.shortcuts import render,redirect
 from hashlib import sha1
 from models import UserInfo
-from django.http import JsonResponse,HttpResponse
+from django.http import JsonResponse,HttpResponse,HttpResponseRedirect,HttpResponse
 import random
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from decorators import *
 
 
 # Create your views here.
 def index(request):
     return render(request, 'tt_user/index.html')
 def register(request):
-    context = {'title':'天天生鲜-注册'}
+    context = {'title':'天天生鲜-注册','top':'0'}
     return render(request,'tt_user/register.html',context)
 
 def register_handle(request):
@@ -37,7 +38,8 @@ def register_handle(request):
     return redirect('/user/login/')
 
 def login(request):
-    context = {'title':'天天生鲜-登陆'}
+    uname = request.COOKIES.get('uname','')
+    context = {'title':'天天生鲜-登陆','uname':uname,'top':'0'}
     return render(request,'tt_user/login.html',context)
 
 def check_user_name(request,name):
@@ -93,29 +95,52 @@ def check_login(request):
     username = dict.get('username')
     userpwd = dict.get('pwd')
     yzm = dict.get('yzm')
-    print yzm
     verifycode = request.session['verifycode']
-    print verifycode
     checkbox = dict.get('checkbox')
+
 
     s = sha1()
     s.update(userpwd)
     pwd = s.hexdigest()
     if yzm != verifycode:
-        return render(request,'tt_user/login.html',{'yzmerror':True})
+        return render(request,'tt_user/login.html',{'yzmerror':True,'top':'0'})
     if UserInfo.objects.filter(uname=username).exists():
         if pwd == UserInfo.objects.get(uname=username).upwd :
+            path = request.session.get('url_path','/user/')
+            request.session['uname'] = username
             if checkbox == 'on':
                 request.session[username] = userpwd
-            return redirect('/user/user_center_info/')
-    return render(request,'tt_user/login.html',{'error':True})
+                response = HttpResponseRedirect(path)
+                response.set_cookie('uname',username,max_age=60*60*24*20)
+                return response
+            return redirect(path)
+    return render(request,'tt_user/login.html',{'error':True,'top':'0'})
 
 def session(request,name):
-    #request.session.flush()
+    # request.session.flush()
     h1=request.session.get(name)
     return JsonResponse({'data':h1})
 
-def user_center_info()
+# @decorators
+def user_center_info(request):
+    uname = request.session.get('uname')
+    context = {'uname':uname,'login':True,'title':'天天生鲜-用户中心'}
+    return render(request,'tt_user/user_center_info.html',context)
 
+@decorators
+def site(request):
+    uname = request.session.get('uname')
+    user = UserInfo.objects.get(uname=uname)
+    if request.method == 'POST':
+        dict = request.POST
+        user.ushou = dict.get('shou')
+        user.uaddress = dict.get('add')
+        user.uphone = dict.get('tel')
+        user.save()
+    context = {'title':'收货地址','user':user}
+    return render(request,'tt_user/user_center_site.html',context)
 
+def quit(request):
+    request.session.flush()
+    return redirect('/user/login/')
 
