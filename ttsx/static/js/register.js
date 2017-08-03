@@ -106,7 +106,7 @@ $(function(){
 	}
 
 
-	$('#reg_form').submit(function() {
+	$('form').submit(function() {
 		check_user_name();
 		check_pwd();
 		check_cpwd();
