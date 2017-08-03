@@ -47,7 +47,7 @@
 				<div class="form_input">
 					<form method="post" action="/user/check_login/">
                         {% csrf_token %}
-						<input type="text" name="username" class="name_input" placeholder="请输入用户名">
+						<input type="text" name="username" class="name_input" value="{{ uname }}" placeholder="请输入用户名">
 						<div class="user_error">用户名或密码输入错误请重新输入</div>
 						<input type="password" name="pwd" class="pass_input" placeholder="请输入密码">
 						<div class="pwd_error">用户名或密码输入错误请重新输入</div>
